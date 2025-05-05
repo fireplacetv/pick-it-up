@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Pick-It-Up</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <h1>Pick-It-Up</h1>
+  <p id="instructons">Tap the apartments that have deliveries to notify your neighbors</p>
+  <div id="buttons-container"></div>
+  <p id="status"></p>
+
+  <script>
+    const floors = {
+        "1st Floor": ["#101","#102","#103","#104","#105","#106","#107","#108"],
+        "2nd Floor": ["#201",       "#203","#204","#205",       "#207","#208"],
+        "3rd Floor": ["#301","#302","#303","#304","#305","#306","#307","#308"],
+        "Penthouse": ["#401"]
+    }
+    const apartments = [
+        "#101", "#102", "#103", "#104", "#105", "#106", "#107", "#108",
+        "#201",         "#203", "#204", "#205",         "#207", "#208",
+        "#301", "#302", "#303", "#304", "#305", "#306", "#307", "#308",
+        "#401"
+    ]
+    const buttons_container = document.getElementById("buttons-container");
+    const status = document.getElementById("status");
+
+    apartments.forEach(apt => {
+        console.log(apt)
+        const button = document.createElement("button");
+        button.textContent = '' + apt;
+        button.onclick = async () => {
+            status.textContent = 'Sending notification to '+apt+'...';
+            try {
+                const res = await fetch("/notify", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ unit_number: apt })
+                });
+                const result = await res.json();
+                status.textContent = result.message;
+            } catch (err) {
+                console.error(err);
+                status.textContent = "Error sending notification.";
+            }
+        };
+        buttons_container.appendChild(button);
+    });
+
+  </script>
+</body>
+</html>
